@@ -41,8 +41,11 @@ const Post = ({ post }) => {
 
 	const isMyPost = authUser._id === post.user._id;
 
-	const formattedDate = "1h";
-
+	const formattedDate = new Date(post.createdAt).toLocaleDateString("en-US", {
+		month: "short",
+		day: "numeric",
+	});
+	
 	const isCommenting = false;
 
 	const handleDeletePost = () => {
@@ -109,7 +112,7 @@ const Post = ({ post }) => {
 									<div className='flex flex-col gap-3 max-h-60 overflow-auto'>
 										{post.comments.length === 0 && (
 											<p className='text-sm text-slate-500'>
-												No comments yet 🤔 Be the first one 😉
+												No comments yet.
 											</p>
 										)}
 										{post.comments.map((comment) => (

@@ -22,7 +22,7 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
+app.use(express.json({limit: "6mb"}));
 app.use(express.urlencoded({ extended: true }))
 
 app.use(cookieParser());

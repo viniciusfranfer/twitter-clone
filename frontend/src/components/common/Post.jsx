@@ -67,7 +67,51 @@ const Post = ({ post }) => {
 		onError: (error) => {
 			toast.error(error.message);
 		}
-	})
+	});
+
+	const { mutate: commentPost, isPending: isCommenting } = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`api/posts/comment/${post._id}`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ text: comment }),
+				})
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error || "Something went wrong");
+				return data;
+
+			} catch (error) {
+				throw new Error(error);
+			}
+		},
+		onSuccess: (updatedComment) => {
+			setComment("");
+			queryClient.setQueryData(["posts"], (oldData) => {
+				if (!oldData) return [];
+				
+				return oldData.map(p => {
+					if (p._id === post._id) {
+						return {
+							...p,
+							comments: [
+								...p.comments,
+								{
+									...updatedComment,
+									user: authUser,
+									text: updatedComment.text || comment 
+								}
+							]
+						};
+					}
+					return p;
+				});
+			});
+
+		},
+	});
 
 	const postOwner = post.user;
 	const isLiked = post.likes.includes(authUser._id);
@@ -79,7 +123,6 @@ const Post = ({ post }) => {
 		day: "numeric",
 	});
 
-	const isCommenting = false;
 
 	const handleDeletePost = () => {
 		deletePost();
@@ -87,6 +130,8 @@ const Post = ({ post }) => {
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		if (isCommenting) return;
+		commentPost();
 	};
 
 	const handleLikePost = () => {
@@ -141,7 +186,6 @@ const Post = ({ post }) => {
 									{post.comments.length}
 								</span>
 							</div>
-							{/* We're using Modal Component from DaisyUI */}
 							<dialog id={`comments_modal${post._id}`} className='modal border-none outline-none'>
 								<div className='modal-box rounded border border-gray-600'>
 									<h3 className='font-bold text-lg mb-4'>COMMENTS</h3>

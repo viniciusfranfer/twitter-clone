@@ -4,6 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import Posts from "../../components/common/Posts";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
 import EditProfileModal from "./EditProfileModal";
+import { formatMemberSinceDate } from "../../util/db/date";
+import useFollow from "../../hooks/useFollow";
 
 import { POSTS } from "../../util/db/dummy";
 
@@ -12,7 +14,7 @@ import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
-import { formatMemberSinceDate } from "../../util/db/date";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const ProfilePage = () => {
 	const [coverImg, setCoverImg] = useState(null);
@@ -24,8 +26,9 @@ const ProfilePage = () => {
 
 	const { username } = useParams();
 
-	const isMyProfile = true;
-	
+	const { follow, isPending } = useFollow();
+
+	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
 	const { data: user, isLoading, refetch, isRefetching } = useQuery({
 		queryKey: ["userProfile"],
@@ -43,7 +46,9 @@ const ProfilePage = () => {
 		}
 	});
 
+	const isMyProfile = authUser._id === user?._id;
 	const memberSinceDate = formatMemberSinceDate(user?.createdAt);
+	const amIfollowing = authUser?.following.includes(user?._id);
 
 	const handleImgChange = (e, state) => {
 		const file = e.target.files[0];
@@ -128,9 +133,11 @@ const ProfilePage = () => {
 								{!isMyProfile && (
 									<button
 										className='btn btn-outline rounded-full btn-sm'
-										onClick={() => alert("Followed successfully")}
+										onClick={() => follow(user?._id)}
 									>
-										Follow
+										{isPending && <LoadingSpinner /> }
+										{!isPending && amIfollowing && "Unfollow"}
+										{!isPending && !amIfollowing && "Follow"}
 									</button>
 								)}
 								{(coverImg || profileImg) && (
@@ -205,7 +212,7 @@ const ProfilePage = () => {
 						</>
 					)}
 
-					<Posts feedType={feedType} username={username} userId={user?._id}/>
+					<Posts feedType={feedType} username={username} userId={user?._id} />
 				</div>
 			</div>
 		</>

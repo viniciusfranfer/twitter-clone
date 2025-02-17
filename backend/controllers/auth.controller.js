@@ -108,6 +108,8 @@ export const getMe = async (req, res) => {
       following: user.following,
       profileImg: user.profileImg,
       coverImg: user.coverImg,
+      link: user.link,
+      bio: user.bio,
     });
   } catch (error) {
     console.log(`Error in getMe controller: ${error.message}`);

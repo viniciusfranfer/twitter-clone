@@ -162,9 +162,9 @@ export const likeUnlikePost = async (req, res) => {
       post.likes.push(userId);
       await User.updateOne({ _id: userId }, { $push: { likedPosts: id } });
       await post.save();
-
-      await notification.save();
-
+      
+      if(userId.toString() !== post.user.toString()) await notification.save();
+      
       const updatedLikes = post.likes;
       res.status(200).json(updatedLikes);
     }

@@ -7,7 +7,7 @@ import EditProfileModal from "./EditProfileModal";
 import { formatMemberSinceDate } from "../../util/db/date";
 import useFollow from "../../hooks/useFollow";
 
-import { POSTS } from "../../util/db/dummy";
+// import { POSTS } from "../../util/db/dummy";
 
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
@@ -27,6 +27,8 @@ const ProfilePage = () => {
 
 	
 	const { username } = useParams();
+	const {data:posts} = useQuery({queryKey: ["posts"],
+	})
 
 	const queryClient = useQueryClient();
 	const { follow, isPending } = useFollow();
@@ -117,7 +119,7 @@ const ProfilePage = () => {
 								</Link>
 								<div className='flex flex-col'>
 									<p className='font-bold text-lg'>{user?.fullName}</p>
-									<span className='text-sm text-slate-500'>{POSTS?.length} posts</span>
+									<span className='text-sm text-slate-500'>{posts.length} posts</span>
 								</div>
 							</div>
 							{/* COVER IMG */}
